@@ -1,4 +1,3 @@
-import 'package:functions_framework/functions_framework.dart';
 import 'package:shelf/shelf.dart';
 import 'package:stack_trace/stack_trace.dart';
 
@@ -9,7 +8,6 @@ import 'src/service.dart';
 import 'src/service_config.dart';
 import 'src/service_exception.dart';
 
-@CloudFunction()
 Future<Response> function(Request request) async {
   final handler = _handler ??=
       _middleware.addMiddleware(requestHeaderAccessMiddleware()).addHandler(

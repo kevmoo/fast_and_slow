@@ -1,0 +1,13 @@
+# See details in `lib/src/service_config.dart` for the needed values.
+apiKey: ???
+projectId: ???
+authDomain: ??? (should usually be [projectId].firebaseapp.com)
+electionUpdateTaskLocation: ???
+electionUpdateTaskQueueId: ???
+serviceAccountEmail: ???
+appId: ???
+
+# remote task runner
+webHost: ???
+# local task runner
+#webHost: 'http://localhost:8080'

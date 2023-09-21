@@ -1,0 +1,13 @@
+# See details in `lib/src/service_config.dart` for the needed values.
+apiKey: "AIzaSyD-BEnanZopAMupeec6imGUfiIr_xMRsIg"
+authDomain: "knarlyvote.com"
+projectId: "j832-com"
+appId: "1:915141274861:web:5a1fafe7914423853930e4"
+electionUpdateTaskLocation: ???
+electionUpdateTaskQueueId: ???
+serviceAccountEmail: ???
+
+# remote task runner
+#webHost: ???
+# local task runner
+webHost: 'http://localhost:8080'

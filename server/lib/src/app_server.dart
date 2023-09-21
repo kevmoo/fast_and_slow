@@ -4,6 +4,9 @@ import 'package:google_cloud/google_cloud.dart';
 import 'package:googleapis/firestore/v1.dart';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:shelf/shelf.dart';
+import 'package:shelf_router/shelf_router.dart';
+
+part 'app_server.g.dart';
 
 class AppServer {
   AppServer._({
@@ -48,6 +51,8 @@ environment variables:
     );
   }
 
+  Router get router => _$AppServerRouter(this);
+
   final String _projectId;
   final bool _hosted;
   final AutoRefreshingAuthClient _client;
@@ -55,9 +60,9 @@ environment variables:
   late final FirestoreApi _firestoreApi = FirestoreApi(_client);
   late final handler =
       createLoggingMiddleware(projectId: _hosted ? _projectId : null)
-          .addMiddleware(_onlyGetRootMiddleware)
-          .addHandler(_incrementHandler);
+          .addHandler(_$AppServerRouter(this).call);
 
+  @Route.get('/api/increment')
   Future<Response> _incrementHandler(Request request) async {
     final result = await _firestoreApi.projects.databases.documents.commit(
       _incrementRequest(_projectId),
@@ -74,15 +79,6 @@ environment variables:
     _client.close();
   }
 }
-
-/// For `GET` `request` objects to [handler], otherwise sends a 404.
-Handler _onlyGetRootMiddleware(Handler handler) => (Request request) async {
-      if (request.method == 'GET' && request.url.pathSegments.isEmpty) {
-        return await handler(request);
-      }
-
-      throw BadRequestException(404, 'Not found');
-    };
 
 CommitRequest _incrementRequest(String projectId) => CommitRequest(
       writes: [

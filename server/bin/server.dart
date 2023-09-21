@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'package:fast_slow_server/app_server.dart';
+import 'package:fast_slow_server/src/app_server.dart';
 import 'package:google_cloud/google_cloud.dart';
 
 Future<void> main() async {

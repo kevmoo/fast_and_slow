@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:shelf/shelf.dart';
 
 void debugPrintRequestHeaders(Request request) {
@@ -8,6 +10,9 @@ ${prettyMap(request.headers)}
 ***END REQUEST HEADERS***''',
   );
 }
+
+String prettyJson(Object? json) =>
+    const JsonEncoder.withIndent(' ').convert(json);
 
 String prettyMap(Map<String, dynamic> input) =>
     (input.entries.toList()..sort((a, b) => a.key.compareTo(b.key)))

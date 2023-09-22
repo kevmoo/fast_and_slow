@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:googleapis/cloudtasks/v2.dart';
 import 'package:googleapis/firestore/v1.dart';
@@ -127,6 +126,3 @@ class FirestoreElectionStorage {
   ) =>
       _documents.withTransaction(action, _databaseId);
 }
-
-String prettyJson(Object? json) =>
-    const JsonEncoder.withIndent(' ').convert(json);

@@ -73,7 +73,7 @@ class UserListenable
 
     current?.dispose();
 
-    _value = ValueUserModel(newValue);
+    _value = HttpPostUserModel(newValue);
 
     if (_value == null) {
       _signInState = AppSignInState.signedOut;

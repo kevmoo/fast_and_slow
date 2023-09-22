@@ -39,7 +39,9 @@ class HttpPostUserModel extends UserModel {
   set value(double val) {
     if (val != _value) {
       _value = val;
-      throw UnimplementedError('need to post to server!');
+
+      Future.microtask(_post);
+
       notifyListeners();
     }
   }
@@ -49,6 +51,13 @@ class HttpPostUserModel extends UserModel {
       __syncValue = val;
       notifyListeners();
     }
+  }
+
+  Future<void> _post() async {
+    final token = await _user.getIdToken();
+    print('token!');
+    print(token);
+    throw UnimplementedError();
   }
 
   late final StreamSubscription<DocumentSnapshot> _snapShotSub;

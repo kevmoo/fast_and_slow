@@ -8,6 +8,7 @@ import 'cloud_headers.dart';
 import 'firestore_election_storage.dart';
 import 'service_config.dart';
 import 'service_exception.dart';
+import 'shared.dart';
 import 'token_helpers.dart';
 
 part 'service.g.dart';

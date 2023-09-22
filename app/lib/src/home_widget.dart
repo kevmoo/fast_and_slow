@@ -25,14 +25,14 @@ class HomeWidget extends StatelessWidget {
 
   Widget _authButton(BuildContext context) =>
       switch (CurrentUserWidget.of(context).signInState) {
-        AppSignInState.unknown => const FloatingActionButton(
-            onPressed: null,
-            tooltip: 'Waiting on Firebase auth...',
-            child: Icon(Icons.question_mark),
+        AppSignInState.unknown => FloatingActionButton(
+            onPressed: () => const SignInRoute().go(context),
+            tooltip: 'Sign in (maybe?)',
+            child: const Icon(Icons.login),
           ),
         AppSignInState.signedIn => FloatingActionButton(
             onPressed: () => FirebaseAuth.instance.signOut(),
-            tooltip: 'TBD: Sign out',
+            tooltip: 'Sign out',
             child: const Icon(Icons.logout),
           ),
         AppSignInState.signedOut => FloatingActionButton(

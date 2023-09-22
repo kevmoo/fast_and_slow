@@ -15,5 +15,10 @@ Router _$AppServerRouter(AppServer service) {
     r'/api/increment',
     service._incrementHandler,
   );
+  router.add(
+    'GET',
+    r'/api/updateValue',
+    service._updateValue,
+  );
   return router;
 }

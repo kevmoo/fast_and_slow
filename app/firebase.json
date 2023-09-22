@@ -1,0 +1,35 @@
+{
+  "hosting": {
+    "predeploy": "./firebase_predeploy.dart",
+    "site": "f3-2023",
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*"
+    ],
+    "rewrites": [
+      {
+        "source": "/api/**",
+        "run": {
+          "serviceId": "fast-and-slow",
+          "region": "us-central1"
+        }
+      }
+    ],
+    "headers": [
+      {
+        "source": "**/*",
+        "headers": [
+          {
+            "key": "cross-origin-opener-policy",
+            "value": "same-origin"
+          },
+          {
+            "key": "cross-origin-embedder-policy",
+            "value": "require-corp"
+          }
+        ]
+      }
+    ]
+  }
+}

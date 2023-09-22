@@ -59,7 +59,7 @@ class HttpPostUserModel extends UserModel {
     final token = await _user.getIdToken();
 
     await http.post(
-      Uri.parse('http://localhost:8081/api/updateValue'),
+      Uri.parse('/api/updateValue'),
       headers: {'Authorization': 'Bearer $token'},
       body: jsonEncode(
         {'value': _value},

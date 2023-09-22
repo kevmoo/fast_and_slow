@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 
 abstract class UserModel with ChangeNotifier {
   UserModel(this._user);
@@ -25,7 +27,7 @@ class HttpPostUserModel extends UserModel {
         userDoc.snapshots(includeMetadataChanges: true).listen(_docSnapshot);
   }
 
-  static const _valueKey = 'pushValue';
+  static const _valueKey = 'value';
 
   double _value = _defaultValue;
   String __syncValue = '???';
@@ -55,9 +57,14 @@ class HttpPostUserModel extends UserModel {
 
   Future<void> _post() async {
     final token = await _user.getIdToken();
-    print('token!');
-    print(token);
-    throw UnimplementedError();
+
+    await http.post(
+      Uri.parse('http://localhost:8081/api/updateValue'),
+      headers: {'Authorization': 'Bearer $token'},
+      body: jsonEncode(
+        {'value': _value},
+      ),
+    );
   }
 
   late final StreamSubscription<DocumentSnapshot> _snapShotSub;

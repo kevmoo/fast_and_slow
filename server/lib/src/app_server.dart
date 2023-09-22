@@ -8,6 +8,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:stack_trace/stack_trace.dart';
 
+import 'firestore_extensions.dart';
 import 'openid_config.dart';
 import 'service_exception.dart';
 import 'shared.dart';
@@ -99,13 +100,46 @@ environment variables:
     return _okJsonResponse(result);
   }
 
-  @Route.get('/api/updateValue')
+  @Route.options('/api/updateValue')
+  Response _options(Request request) => Response(
+        204,
+        headers: {
+          'Allow': 'OPTIONS, POST',
+          'Access-Control-Allow-Origin': 'http://localhost:8080',
+          'Access-Control-Request-Method': 'POST',
+          'Access-Control-Allow-Headers': 'Authorization',
+        },
+      );
+
+  @Route.post('/api/updateValue')
   Future<Response> _updateValue(Request request) async {
     final jwt = await _jwtSubjectFromRequest(request);
 
-    return _okJsonResponse({
-      'subject': jwt,
-    });
+    final body = jsonDecode(await request.readAsString()) as JsonMap;
+
+    final db = 'projects/$_projectId/databases/(default)';
+
+    final result = await _firestoreApi.projects.databases.documents.batchWrite(
+      BatchWriteRequest(
+        writes: [
+          Write(
+            update: documentFromMap(
+              name: '$db/documents/users/$jwt',
+              value: {'value': body['value'] as num},
+            ),
+          ),
+        ],
+      ),
+      db,
+    );
+
+    return Response.ok(
+      jsonEncode(result),
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': 'http://localhost:8080',
+      },
+    );
   }
 
   void close() {
@@ -225,3 +259,12 @@ Handler _errorAndCacheMiddleware(Handler innerHandler) =>
         );
       }
     };
+
+Document documentFromMap({required String name, required JsonMap value}) =>
+    Document(
+      name: name,
+      fields: {
+        for (var entry in value.entries)
+          entry.key: valueFromLiteral(entry.value),
+      },
+    );

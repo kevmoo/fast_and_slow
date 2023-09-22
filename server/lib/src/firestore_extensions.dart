@@ -36,6 +36,12 @@ Value valueFromLiteral(Object? literal) {
     );
   }
 
+  if (literal is double) {
+    return Value(
+      doubleValue: literal,
+    );
+  }
+
   throw UnimplementedError('For "$literal" - (${literal.runtimeType})');
 }
 

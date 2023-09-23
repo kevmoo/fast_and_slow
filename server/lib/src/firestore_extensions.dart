@@ -3,18 +3,18 @@ import 'dart:async';
 import 'package:googleapis/firestore/v1.dart';
 
 Value valueFromLiteral(Object? literal) {
-  if (literal is List) {
-    return Value(
-      arrayValue: ArrayValue(values: literal.map(valueFromLiteral).toList()),
-    );
-  }
-
   if (literal is String) {
     return Value(stringValue: literal);
   }
 
-  if (literal is int) {
+  if (literal is int || literal is BigInt) {
     return Value(integerValue: literal.toString());
+  }
+
+  if (literal is double) {
+    return Value(
+      doubleValue: literal,
+    );
   }
 
   if (literal is List) {
@@ -33,12 +33,6 @@ Value valueFromLiteral(Object? literal) {
           (key, value) => MapEntry(key as String, valueFromLiteral(value)),
         ),
       ),
-    );
-  }
-
-  if (literal is double) {
-    return Value(
-      doubleValue: literal,
     );
   }
 

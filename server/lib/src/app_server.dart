@@ -8,7 +8,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:stack_trace/stack_trace.dart';
 
-import 'firestore_extensions.dart';
+import 'api_stub.dart';
 import 'openid_config.dart';
 import 'service_exception.dart';
 import 'shared.dart';
@@ -17,15 +17,13 @@ import 'wip_config.dart' as config;
 
 part 'app_server.g.dart';
 
-class AppServer {
+class AppServer extends APIStub {
   AppServer._({
-    required String projectId,
-    required AutoRefreshingAuthClient client,
+    required super.projectId,
+    required super.authClient,
     required bool hosted,
     required List<Uri> keySetUrls,
-  })  : _hosted = hosted,
-        _projectId = projectId,
-        _client = client {
+  }) : _hosted = hosted {
     for (var uri in keySetUrls) {
       _jsonWebKeyStore.addKeySetUrl(uri);
     }
@@ -72,7 +70,7 @@ environment variables:
 
     return AppServer._(
       projectId: projectId,
-      client: authClient,
+      authClient: authClient,
       hosted: hosted,
       keySetUrls: keySetUrls,
     );
@@ -80,36 +78,22 @@ environment variables:
 
   final _jsonWebKeyStore = JsonWebKeyStore();
 
-  final String _projectId;
   final bool _hosted;
-  final AutoRefreshingAuthClient _client;
 
-  late final FirestoreApi _firestoreApi = FirestoreApi(_client);
   late final handler =
-      createLoggingMiddleware(projectId: _hosted ? _projectId : null)
+      createLoggingMiddleware(projectId: _hosted ? projectId : null)
           .addMiddleware(_errorAndCacheMiddleware)
           .addHandler(_$AppServerRouter(this).call);
 
   @Route.get('/api/increment')
   Future<Response> _incrementHandler(Request request) async {
-    final result = await _firestoreApi.projects.databases.documents.commit(
-      _incrementRequest(_projectId),
-      'projects/$_projectId/databases/(default)',
+    final result = await firestoreApi.projects.databases.documents.commit(
+      _incrementRequest(projectId),
+      'projects/$projectId/databases/(default)',
     );
 
     return _okJsonResponse(result);
   }
-
-  @Route.options('/api/updateValue')
-  Response _options(Request request) => Response(
-        204,
-        headers: {
-          'Allow': 'OPTIONS, POST',
-          'Access-Control-Allow-Origin': 'http://localhost:8080',
-          'Access-Control-Request-Method': 'POST',
-          'Access-Control-Allow-Headers': 'Authorization',
-        },
-      );
 
   @Route.post('/api/updateValue')
   Future<Response> _updateValue(Request request) async {
@@ -117,9 +101,9 @@ environment variables:
 
     final body = jsonDecode(await request.readAsString()) as JsonMap;
 
-    final db = 'projects/$_projectId/databases/(default)';
+    final db = 'projects/$projectId/databases/(default)';
 
-    final result = await _firestoreApi.projects.databases.documents.batchWrite(
+    final result = await firestoreApi.projects.databases.documents.batchWrite(
       BatchWriteRequest(
         writes: [
           Write(
@@ -135,25 +119,18 @@ environment variables:
 
     return Response.ok(
       jsonEncode(result),
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': 'http://localhost:8080',
-      },
+      headers: {'Content-Type': 'application/json'},
     );
-  }
-
-  void close() {
-    _client.close();
   }
 
   Future<String> _jwtSubjectFromRequest(Request request) async {
     final jwt = await _jwtFromRequest(request, expectServiceRequest: false);
 
-    final hasAudience = jwt.claims.audience?.contains(_projectId);
+    final hasAudience = jwt.claims.audience?.contains(projectId);
 
     if (hasAudience != true) {
       throw ServiceException.authorizationTokenValidation(
-        'Audience does not contain expected project "$_projectId".',
+        'Audience does not contain expected project "$projectId".',
       );
     }
 
@@ -259,12 +236,3 @@ Handler _errorAndCacheMiddleware(Handler innerHandler) =>
         );
       }
     };
-
-Document documentFromMap({required String name, required JsonMap value}) =>
-    Document(
-      name: name,
-      fields: {
-        for (var entry in value.entries)
-          entry.key: valueFromLiteral(entry.value),
-      },
-    );

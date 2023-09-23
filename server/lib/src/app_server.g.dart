@@ -16,11 +16,6 @@ Router _$AppServerRouter(AppServer service) {
     service._incrementHandler,
   );
   router.add(
-    'OPTIONS',
-    r'/api/updateValue',
-    service._options,
-  );
-  router.add(
     'POST',
     r'/api/updateValue',
     service._updateValue,

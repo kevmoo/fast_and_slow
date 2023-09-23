@@ -37,6 +37,8 @@ class HttpPostUserModel extends UserModel {
   @override
   String get syncValue => __syncValue;
 
+  bool _uploading = false;
+
   @override
   set value(double val) {
     if (val != _value) {
@@ -56,15 +58,31 @@ class HttpPostUserModel extends UserModel {
   }
 
   Future<void> _post() async {
-    final token = await _user.getIdToken();
+    if (!_uploading) {
+      _uploading = true;
+      final valueToSend = _value;
+      final token = await _user.getIdToken();
 
-    await http.post(
-      Uri.parse('/api/updateValue'),
-      headers: {'Authorization': 'Bearer $token'},
-      body: jsonEncode(
-        {'value': _value},
-      ),
-    );
+      await http.post(
+        Uri.parse('/api/updateValue'),
+        headers: {'Authorization': 'Bearer $token'},
+        body: jsonEncode(
+          {'value': valueToSend},
+        ),
+      );
+
+      _uploading = false;
+
+      if (valueToSend != _value) {
+        print('need to post again!');
+        unawaited(Future.microtask(_post));
+      }
+      {
+        print('no change!');
+      }
+    } else {
+      print('alreading thing...');
+    }
   }
 
   late final StreamSubscription<DocumentSnapshot> _snapShotSub;

@@ -15,6 +15,7 @@ dependencies:
   shelf: ^1.2.0
   shelf_router: ^1.0.0
   stack_trace: ^1.10.0
+  stats: ^2.1.0
   vote: ^2.1.0
   yaml: ^3.1.0
 

@@ -62,6 +62,10 @@ extension ValueExtention on Value {
       return int.parse(integerValue!);
     }
 
+    if (doubleValue != null) {
+      return doubleValue;
+    }
+
     throw UnimplementedError(toJson().toString());
   }
 }
@@ -125,7 +129,7 @@ extension ProjectsDatabasesDocumentsResourceExtension
   /// If [action] succeeds, the transaction is committed.
   /// Otherwise, the transaction in rolled back.
   Future<T> withTransaction<T>(
-    FutureOr<T> Function(String) action,
+    FutureOr<T> Function(String transaction) action,
     String database,
   ) async {
     final transaction = (await beginTransaction(

@@ -87,7 +87,7 @@ environment variables:
 
   @Route.get('/api/increment')
   Future<Response> _incrementHandler(Request request) async {
-    final result = await firestoreApi.projects.databases.documents.commit(
+    final result = await documents.commit(
       _incrementRequest(projectId),
       'projects/$projectId/databases/(default)',
     );
@@ -101,21 +101,7 @@ environment variables:
 
     final body = jsonDecode(await request.readAsString()) as JsonMap;
 
-    final db = 'projects/$projectId/databases/(default)';
-
-    final result = await firestoreApi.projects.databases.documents.batchWrite(
-      BatchWriteRequest(
-        writes: [
-          Write(
-            update: documentFromMap(
-              name: '$db/documents/users/$jwt',
-              value: {'value': body['value'] as num},
-            ),
-          ),
-        ],
-      ),
-      db,
-    );
+    final result = await updateValue(jwt, body['value'] as num);
 
     return Response.ok(
       jsonEncode(result),

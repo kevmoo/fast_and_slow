@@ -10,7 +10,7 @@ Future<void> main() async {
 
   final silly = APIStub(projectId: 'f3-2023', authClient: authClient);
   try {
-    print(prettyJson(await silly.updateValue('_12345', 6)));
+    print(prettyJson(await silly.aggregate()));
   } finally {
     silly.close();
   }

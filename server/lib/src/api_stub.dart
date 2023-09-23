@@ -33,7 +33,7 @@ class APIStub {
   late final _firestoreApi = FirestoreApi(_authClient);
   late final _cloudTasks = CloudTasksApi(_authClient);
 
-  String get _database => 'projects/$projectId/databases/(default)';
+  late final String _database = 'projects/$projectId/databases/(default)';
 
   ProjectsDatabasesDocumentsResource get _documents =>
       _firestoreApi.projects.databases.documents;
@@ -67,8 +67,24 @@ class APIStub {
   }
 
   Future<CommitResponse> increment() async => await _documents.commit(
-        _incrementRequest(projectId),
+        _incrementRequest(),
         _database,
+      );
+
+  CommitRequest _incrementRequest() => CommitRequest(
+        writes: [
+          Write(
+            transform: DocumentTransform(
+              document: '$_database/documents/settings/count',
+              fieldTransforms: [
+                FieldTransform(
+                  fieldPath: 'count',
+                  increment: Value(integerValue: '1'),
+                ),
+              ],
+            ),
+          ),
+        ],
       );
 
   Future<LightStats<double>> aggregate() async =>
@@ -135,21 +151,4 @@ Document documentFromMap({required String name, required JsonMap value}) =>
         for (var entry in value.entries)
           entry.key: valueFromLiteral(entry.value),
       },
-    );
-
-CommitRequest _incrementRequest(String projectId) => CommitRequest(
-      writes: [
-        Write(
-          transform: DocumentTransform(
-            document:
-                'projects/$projectId/databases/(default)/documents/settings/count',
-            fieldTransforms: [
-              FieldTransform(
-                fieldPath: 'count',
-                increment: Value(integerValue: '1'),
-              ),
-            ],
-          ),
-        ),
-      ],
     );

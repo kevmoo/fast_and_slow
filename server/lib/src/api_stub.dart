@@ -78,10 +78,7 @@ class APIStub {
             _documents
                 .listAll('$_database/documents', 'users')
                 .expand((element) => element)
-                .map((event) {
-                  final val = event.fields!['value']?.doubleValue;
-                  return val;
-                })
+                .map((event) => event.literalValues?['value'] as num?)
                 .where((event) => event != null)
                 .cast<double>(),
           );

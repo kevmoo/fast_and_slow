@@ -6,7 +6,7 @@ Future<void> main() async {
   try {
     print(prettyJson(await silly.aggregate()));
 
-    print(prettyJson(await silly.queueAggregateTask()));
+    //print(prettyJson(await silly.queueAggregateTask()));
   } finally {
     silly.close();
   }

@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:google_cloud/google_cloud.dart';
-import 'package:googleapis/firestore/v1.dart';
 import 'package:jose/jose.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
@@ -86,10 +85,7 @@ environment variables:
 
   @Route.get('/api/increment')
   Future<Response> _incrementHandler(Request request) async {
-    final result = await _stub.documents.commit(
-      _incrementRequest(_projectId),
-      'projects/$_projectId/databases/(default)',
-    );
+    final result = await _stub.increment();
 
     return _okJsonResponse(result);
   }
@@ -106,6 +102,16 @@ environment variables:
       jsonEncode(result),
       headers: {'Content-Type': 'application/json'},
     );
+  }
+
+  @Route.post('/api/update-aggregate')
+  Future<Response> _updateAggregate(Request request) async {
+    final jwt = await _jwtFromRequest(request, expectServiceRequest: true);
+
+    print(jsonDecode(await request.readAsString()) as JsonMap);
+    print(jsonDecode(jsonEncode(request.headers)));
+
+    return Response.ok('okay!');
   }
 
   Future<String> _jwtSubjectFromRequest(Request request) async {
@@ -169,23 +175,6 @@ environment variables:
     _stub.close();
   }
 }
-
-CommitRequest _incrementRequest(String projectId) => CommitRequest(
-      writes: [
-        Write(
-          transform: DocumentTransform(
-            document:
-                'projects/$projectId/databases/(default)/documents/settings/count',
-            fieldTransforms: [
-              FieldTransform(
-                fieldPath: 'count',
-                increment: Value(integerValue: '1'),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
 
 Response _okJsonResponse(Object json) => Response.ok(
       jsonEncode(json),

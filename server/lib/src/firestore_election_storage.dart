@@ -17,9 +17,7 @@ Future<FirestoreElectionStorage> createElectionStorage(
   final client = await clientViaApplicationDefaultCredentials(
     scopes: [
       FirestoreApi.datastoreScope,
-      // TODO: this should be exposed on the CloudTasks class!
-      // https://github.com/google/googleapis.dart/issues/276
-      'https://www.googleapis.com/auth/cloud-tasks',
+      CloudTasksApi.cloudTasksScope,
     ],
   );
 

@@ -20,5 +20,10 @@ Router _$AppServerRouter(AppServer service) {
     r'/api/updateValue',
     service._updateValue,
   );
+  router.add(
+    'POST',
+    r'/api/update-aggregate',
+    service._updateAggregate,
+  );
   return router;
 }

@@ -5,6 +5,8 @@ Future<void> main() async {
   final silly = await APIStub.create(projectId: 'f3-2023');
   try {
     print(prettyJson(await silly.aggregate()));
+
+    print(prettyJson(await silly.queueAggregateTask()));
   } finally {
     silly.close();
   }

@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:google_cloud/google_cloud.dart';
 import 'package:googleapis/firestore/v1.dart';
-import 'package:googleapis_auth/auth_io.dart';
 import 'package:jose/jose.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
@@ -17,13 +16,13 @@ import 'wip_config.dart' as config;
 
 part 'app_server.g.dart';
 
-class AppServer extends APIStub {
+class AppServer {
   AppServer._({
-    required super.projectId,
-    required super.authClient,
+    required APIStub stub,
     required bool hosted,
     required List<Uri> keySetUrls,
-  }) : _hosted = hosted {
+  })  : _hosted = hosted,
+        _stub = stub {
     for (var uri in keySetUrls) {
       _jsonWebKeyStore.addKeySetUrl(uri);
     }
@@ -52,10 +51,6 @@ environment variables:
 
     print('Current GCP project id: $projectId');
 
-    final authClient = await clientViaApplicationDefaultCredentials(
-      scopes: [FirestoreApi.datastoreScope],
-    );
-
     final openIdConfigurationUris = [
       // See https://cloud.google.com/endpoints/docs/openapi/authenticating-users-firebase#configuring_your_openapi_document
       Uri.parse(
@@ -68,28 +63,32 @@ environment variables:
 
     final keySetUrls = await jwksUris(openIdConfigurationUris);
 
+    final stub = await APIStub.create(projectId: projectId);
+
     return AppServer._(
-      projectId: projectId,
-      authClient: authClient,
+      stub: stub,
       hosted: hosted,
       keySetUrls: keySetUrls,
     );
   }
 
+  final APIStub _stub;
   final _jsonWebKeyStore = JsonWebKeyStore();
+
+  String get _projectId => _stub.projectId;
 
   final bool _hosted;
 
   late final handler =
-      createLoggingMiddleware(projectId: _hosted ? projectId : null)
+      createLoggingMiddleware(projectId: _hosted ? _projectId : null)
           .addMiddleware(_errorAndCacheMiddleware)
           .addHandler(_$AppServerRouter(this).call);
 
   @Route.get('/api/increment')
   Future<Response> _incrementHandler(Request request) async {
-    final result = await documents.commit(
-      _incrementRequest(projectId),
-      'projects/$projectId/databases/(default)',
+    final result = await _stub.documents.commit(
+      _incrementRequest(_projectId),
+      'projects/$_projectId/databases/(default)',
     );
 
     return _okJsonResponse(result);
@@ -101,7 +100,7 @@ environment variables:
 
     final body = jsonDecode(await request.readAsString()) as JsonMap;
 
-    final result = await updateValue(jwt, body['value'] as num);
+    final result = await _stub.updateValue(jwt, body['value'] as num);
 
     return Response.ok(
       jsonEncode(result),
@@ -112,11 +111,11 @@ environment variables:
   Future<String> _jwtSubjectFromRequest(Request request) async {
     final jwt = await _jwtFromRequest(request, expectServiceRequest: false);
 
-    final hasAudience = jwt.claims.audience?.contains(projectId);
+    final hasAudience = jwt.claims.audience?.contains(_projectId);
 
     if (hasAudience != true) {
       throw ServiceException.authorizationTokenValidation(
-        'Audience does not contain expected project "$projectId".',
+        'Audience does not contain expected project "$_projectId".',
       );
     }
 
@@ -164,6 +163,10 @@ environment variables:
     throw ServiceException.authorizationTokenValidation(
       'Token could not be verified.',
     );
+  }
+
+  void close() {
+    _stub.close();
   }
 }
 

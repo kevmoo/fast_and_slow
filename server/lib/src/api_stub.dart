@@ -6,10 +6,18 @@ import 'firestore_extensions.dart';
 import 'shared.dart';
 
 class APIStub {
-  APIStub({
+  APIStub._({
     required this.projectId,
     required this.authClient,
   });
+
+  static Future<APIStub> create({required String projectId}) async {
+    final authClient = await clientViaApplicationDefaultCredentials(
+      scopes: [FirestoreApi.datastoreScope],
+    );
+
+    return APIStub._(projectId: projectId, authClient: authClient);
+  }
 
   final String projectId;
   final AutoRefreshingAuthClient authClient;

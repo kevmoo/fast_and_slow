@@ -108,8 +108,13 @@ environment variables:
   Future<Response> _updateAggregate(Request request) async {
     final jwt = await _jwtFromRequest(request, expectServiceRequest: true);
 
-    print(jsonDecode(await request.readAsString()) as JsonMap);
-    print(jsonDecode(jsonEncode(request.headers)));
+    print(
+      jsonEncode({
+        'headers': request.headers,
+        'jwt': jwt.claims,
+        'body': await request.readAsString(),
+      }),
+    );
 
     return Response.ok('okay!');
   }

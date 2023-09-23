@@ -108,13 +108,17 @@ environment variables:
   Future<Response> _updateAggregate(Request request) async {
     final jwt = await _jwtFromRequest(request, expectServiceRequest: true);
 
-    print(
-      jsonEncode({
+    currentLogger.debug(
+      {
         'headers': request.headers,
         'jwt': jwt.claims,
         'body': await request.readAsString(),
-      }),
+      },
     );
+
+    final result = await _stub.aggregate();
+
+    currentLogger.debug(result.toJson());
 
     return Response.ok('okay!');
   }

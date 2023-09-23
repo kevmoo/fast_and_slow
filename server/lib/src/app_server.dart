@@ -98,6 +98,8 @@ environment variables:
 
     final result = await _stub.updateValue(jwt, body['value'] as num);
 
+    await _stub.queueAggregateTask();
+
     return Response.ok(
       jsonEncode(result),
       headers: {'Content-Type': 'application/json'},

@@ -18,7 +18,7 @@ class HomeWidget extends StatelessWidget {
       ),
       body: signInState == AppSignInState.signedIn
           ? UserWidget(user: CurrentUserWidget.of(context).currentUser!)
-          : Text('todo...$signInState'),
+          : Text('Please login! ($signInState)'),
       floatingActionButton: _authButton(context),
     );
   }

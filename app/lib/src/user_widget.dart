@@ -26,6 +26,22 @@ class UserWidget extends StatelessWidget {
                   max: 10,
                   divisions: 20,
                 ),
+                Table(
+                  children: [
+                    const TableRow(children: [
+                      Text('Count'),
+                      Text('Min'),
+                      Text('Average'),
+                      Text('Max'),
+                    ]),
+                    TableRow(children: [
+                      Text(user.stats.count.toString()),
+                      Text(user.stats.min.toString()),
+                      Text(user.stats.average.toString()),
+                      Text(user.stats.max.toString()),
+                    ])
+                  ],
+                ),
               ],
             ),
           ),

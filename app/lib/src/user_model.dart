@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:stats/stats.dart';
 
 abstract class UserModel with ChangeNotifier {
   UserModel(this._user);
@@ -17,14 +18,20 @@ abstract class UserModel with ChangeNotifier {
   set value(double val);
 
   String get syncValue;
+
+  LightStats<double> get stats;
 }
 
 class HttpPostUserModel extends UserModel {
   HttpPostUserModel(super.user) {
     final userDoc = FirebaseFirestore.instance.doc('users/${_user.uid}');
+    final statsDoc = FirebaseFirestore.instance.doc('settings/summary');
 
     _snapShotSub =
         userDoc.snapshots(includeMetadataChanges: true).listen(_docSnapshot);
+    _settingsSub = statsDoc
+        .snapshots(includeMetadataChanges: true)
+        .listen(_settingsSnapshot);
   }
 
   static const _valueKey = 'value';
@@ -57,6 +64,11 @@ class HttpPostUserModel extends UserModel {
     }
   }
 
+  LightStats<double> _stats = LightStats<double>.fromData([5.0]);
+
+  @override
+  LightStats<double> get stats => _stats;
+
   Future<void> _post() async {
     if (!_uploading) {
       _uploading = true;
@@ -86,6 +98,7 @@ class HttpPostUserModel extends UserModel {
   }
 
   late final StreamSubscription<DocumentSnapshot> _snapShotSub;
+  late final StreamSubscription<DocumentSnapshot> _settingsSub;
 
   String get uid => _user.uid;
 
@@ -101,10 +114,18 @@ class HttpPostUserModel extends UserModel {
     }
   }
 
+  void _settingsSnapshot(DocumentSnapshot incomingValue) {
+    final snapshotVal = incomingValue.data();
+
+    _stats = LightStats<double>.fromJson(snapshotVal as Map<String, dynamic>);
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     super.dispose();
     _snapShotSub.cancel();
+    _settingsSub.cancel();
   }
 }
 
@@ -141,6 +162,9 @@ class ValueUserModel extends UserModel {
       notifyListeners();
     }
   }
+
+  @override
+  LightStats<double> get stats => throw UnimplementedError();
 
   late final DocumentReference _userDoc;
   late final StreamSubscription<DocumentSnapshot> _snapShotSub;

@@ -88,12 +88,11 @@ class HttpPostUserModel extends UserModel {
       if (valueToSend != _value) {
         print('need to post again!');
         unawaited(Future.microtask(_post));
-      }
-      {
+      } else {
         print('no change!');
       }
     } else {
-      print('alreading thing...');
+      print('already thing...');
     }
   }
 

@@ -27,11 +27,8 @@ class HttpPostUserModel extends UserModel {
     final userDoc = FirebaseFirestore.instance.doc('users/${_user.uid}');
     final statsDoc = FirebaseFirestore.instance.doc('settings/summary');
 
-    _snapShotSub =
-        userDoc.snapshots(includeMetadataChanges: true).listen(_docSnapshot);
-    _settingsSub = statsDoc
-        .snapshots(includeMetadataChanges: true)
-        .listen(_settingsSnapshot);
+    _snapShotSub = userDoc.snapshots().listen(_docSnapshot);
+    _settingsSub = statsDoc.snapshots().listen(_settingsSnapshot);
   }
 
   static const _valueKey = 'value';

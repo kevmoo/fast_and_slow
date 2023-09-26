@@ -14,7 +14,7 @@ class HomeWidget extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Top Bug🐞'),
+        title: const Text('Fast & Slow'),
       ),
       body: signInState == AppSignInState.signedIn
           ? UserWidget(user: CurrentUserWidget.of(context).currentUser!)

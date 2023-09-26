@@ -3,11 +3,8 @@ import 'package:googleapis/firestore/v1.dart';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:stats/stats.dart';
 
-import 'cloud_headers.dart';
 import 'firestore_extensions.dart';
-import 'header_access_middleware.dart';
 import 'shared.dart';
-import 'trace_context.dart';
 import 'wip_config.dart' as config;
 
 class APIStub {
@@ -41,8 +38,6 @@ class APIStub {
   Future<Task> queueAggregateTask() async {
     final updateUri = '${config.webHost}/api/update-aggregate';
 
-    final traceParent = currentRequestHeaders?[traceParentHeaderName];
-
     final result = await _cloudTasks.projects.locations.queues.tasks.create(
       CreateTaskRequest(
         task: Task(
@@ -51,16 +46,10 @@ class APIStub {
             oidcToken: OidcToken(
               serviceAccountEmail: config.serviceAccountEmail,
             ),
-            headers: traceParent == null
-                ? null
-                : {
-                    traceParentHeaderName:
-                        TraceContext.parse(traceParent).randomize().toString(),
-                  },
           ),
         ),
       ),
-      'projects/$projectId/locations/${config.electionUpdateTaskLocation}/queues/${config.electionUpdateTaskQueueId}',
+      'projects/$projectId/locations/${config.taskLocation}/queues/${config.taskQueue}',
     );
 
     return result;

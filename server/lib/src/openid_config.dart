@@ -1,8 +1,31 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:jose/jose.dart';
 
-Future<List<Uri>> jwksUris(List<Uri> openIdConfigurationUris) async {
+Future<JsonWebKeyStore> createKeyStore(String projectId) async {
+  final openIdConfigurationUris = [
+    // See https://cloud.google.com/endpoints/docs/openapi/authenticating-users-firebase#configuring_your_openapi_document
+    Uri.parse(
+      'https://securetoken.google.com/$projectId/.well-known/openid-configuration',
+    ),
+    Uri.parse(
+      'https://accounts.google.com/.well-known/openid-configuration',
+    ),
+  ];
+
+  final list = await _jwksUris(openIdConfigurationUris);
+
+  final jsonWebKeyStore = JsonWebKeyStore();
+
+  for (var uri in list) {
+    jsonWebKeyStore.addKeySetUrl(uri);
+  }
+
+  return jsonWebKeyStore;
+}
+
+Future<List<Uri>> _jwksUris(List<Uri> openIdConfigurationUris) async {
   final client = http.Client();
 
   Future<Uri> jwksUriFromOpenIdConfig(Uri uri) async {

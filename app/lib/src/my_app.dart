@@ -31,7 +31,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) => CurrentUserWidget(
         notifier: _userListenable,
         child: MaterialApp.router(
-          title: 'My app!',
+          title: 'Fast & Slow',
           routerConfig: GoRouter(
             routes: $appRoutes,
             redirect: (BuildContext context, GoRouterState state) {

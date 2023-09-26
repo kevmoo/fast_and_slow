@@ -19,13 +19,12 @@ class AppServer {
   AppServer._({
     required APIStub stub,
     required bool hosted,
-    required List<Uri> keySetUrls,
+    required JsonWebKeyStore keyStore,
   })  : _hosted = hosted,
-        _stub = stub {
-    for (var uri in keySetUrls) {
-      _jsonWebKeyStore.addKeySetUrl(uri);
-    }
-  }
+        _stub = stub,
+        _jsonWebKeyStore = keyStore;
+
+  final JsonWebKeyStore _jsonWebKeyStore;
 
   static Future<AppServer> create() async {
     String? projectId;
@@ -50,29 +49,16 @@ environment variables:
 
     print('Current GCP project id: $projectId');
 
-    final openIdConfigurationUris = [
-      // See https://cloud.google.com/endpoints/docs/openapi/authenticating-users-firebase#configuring_your_openapi_document
-      Uri.parse(
-        'https://securetoken.google.com/$projectId/.well-known/openid-configuration',
-      ),
-      Uri.parse(
-        'https://accounts.google.com/.well-known/openid-configuration',
-      ),
-    ];
-
-    final keySetUrls = await jwksUris(openIdConfigurationUris);
-
     final stub = await APIStub.create(projectId: projectId);
 
     return AppServer._(
       stub: stub,
       hosted: hosted,
-      keySetUrls: keySetUrls,
+      keyStore: await createKeyStore(projectId),
     );
   }
 
   final APIStub _stub;
-  final _jsonWebKeyStore = JsonWebKeyStore();
 
   String get _projectId => _stub.projectId;
 

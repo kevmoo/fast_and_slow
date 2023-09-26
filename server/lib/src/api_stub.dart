@@ -56,24 +56,22 @@ class APIStub {
   }
 
   Future<CommitResponse> increment() async => await _documents.commit(
-        _incrementRequest(),
-        _database,
-      );
-
-  CommitRequest _incrementRequest() => CommitRequest(
-        writes: [
-          Write(
-            transform: DocumentTransform(
-              document: '$_database/documents/settings/count',
-              fieldTransforms: [
-                FieldTransform(
-                  fieldPath: 'count',
-                  increment: Value(integerValue: '1'),
-                ),
-              ],
+        CommitRequest(
+          writes: [
+            Write(
+              transform: DocumentTransform(
+                document: '$_database/documents/settings/count',
+                fieldTransforms: [
+                  FieldTransform(
+                    fieldPath: 'count',
+                    increment: Value(integerValue: '1'),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+        _database,
       );
 
   Future<LightStats<double>> aggregate() async =>
@@ -81,7 +79,7 @@ class APIStub {
         (tx) async {
           final value = await LightStats.fromStream(
             _documents
-                .listAll('$_database/documents', 'users')
+                .listAll('$_database/documents', 'users', transaction: tx)
                 .expand((element) => element)
                 .map(
                   (event) =>
@@ -95,7 +93,7 @@ class APIStub {
             BatchWriteRequest(
               writes: [
                 Write(
-                  update: documentFromMap(
+                  update: _documentFromMap(
                     name: '$_database/documents/settings/summary',
                     value: value.toJson(),
                   ),
@@ -115,7 +113,7 @@ class APIStub {
       BatchWriteRequest(
         writes: [
           Write(
-            update: documentFromMap(
+            update: _documentFromMap(
               name: '$_database/documents/users/$jwt',
               value: {'value': value},
             ),
@@ -133,7 +131,7 @@ class APIStub {
   }
 }
 
-Document documentFromMap({required String name, required JsonMap value}) =>
+Document _documentFromMap({required String name, required JsonMap value}) =>
     Document(
       name: name,
       fields: {

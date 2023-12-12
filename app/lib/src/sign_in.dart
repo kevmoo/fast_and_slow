@@ -24,8 +24,13 @@ class SignInPage extends StatelessWidget {
               return ErrorWidget(
                 'done? ${snapshot.hasData} - ${snapshot.error}',
               );
-
+            case ConnectionState.waiting:
+              return const Center(
+                child: Icon(Icons.timelapse),
+              );
             default:
+              print(
+                  'sign_in widget: no support for ${snapshot.connectionState}');
               return ErrorWidget('no support for ${snapshot.connectionState}');
           }
         },

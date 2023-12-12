@@ -18,7 +18,17 @@ class HomeWidget extends StatelessWidget {
       ),
       body: signInState == AppSignInState.signedIn
           ? UserWidget(user: CurrentUserWidget.of(context).currentUser!)
-          : Text('Please login! ($signInState)'),
+          : const Center(
+              child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Please login (anonymously)!',
+                  style: TextStyle(fontSize: 20),
+                ),
+                Text('See button on bottom right.'),
+              ],
+            )),
       floatingActionButton: _authButton(context),
     );
   }

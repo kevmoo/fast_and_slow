@@ -83,13 +83,13 @@ class HttpPostUserModel extends UserModel {
       _uploading = false;
 
       if (valueToSend != _value) {
-        print('need to post again!');
+        // need to post again
         unawaited(Future.microtask(_post));
       } else {
-        print('no change!');
+        // no change
       }
     } else {
-      print('already thing...');
+      // upload already pending
     }
   }
 
@@ -105,8 +105,8 @@ class HttpPostUserModel extends UserModel {
       value = x.toDouble();
       _syncValue = value.toString();
     } else {
+      // bad value!
       _syncValue = snapshotVal.toString();
-      print('Bad value! $snapshotVal');
     }
   }
 

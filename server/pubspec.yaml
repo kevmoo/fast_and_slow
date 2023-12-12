@@ -1,13 +1,13 @@
 name: fast_slow_server
 
 environment:
-  sdk: ^3.0.0
+  sdk: ^3.2.0
 
 dependencies:
   args: ^2.0.0
   functions_framework: ^0.4.1
   google_cloud: ^0.2.0
-  googleapis: ^11.3.0
+  googleapis: ^12.0.0
   googleapis_auth: ^1.1.0
   http: ^1.0.0
   jose: ^0.3.0
